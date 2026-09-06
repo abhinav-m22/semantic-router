@@ -306,9 +306,16 @@ behind it, and any failed evaluation.
 gh workflow run maintenance.yml -f task=unassign
 ```
 
-The reusable workflow also accepts `dry_run`, `warn_after_days`,
-`unassign_after_days`, and `exempt_labels`; invoke it directly from the Actions
-UI or CLI to preview a sweep without mutations.
+That runs the standard policy with the scheduled defaults. To preview a sweep or
+override a threshold, dispatch the workflow itself, which takes `dry_run`,
+`warn_after_days`, `unassign_after_days`, and `exempt_labels`:
+
+```bash
+gh workflow run unassign-inactive-assignees.yml -f dry_run=true
+```
+
+A direct dispatch defaults to `dry_run=true`, so it reports the transitions it
+would make and mutates nothing until you pass `-f dry_run=false`.
 
 Sweeps are serialized repository-wide by a single concurrency group, so a manual
 dispatch queues behind an in-flight scheduled sweep instead of racing it and

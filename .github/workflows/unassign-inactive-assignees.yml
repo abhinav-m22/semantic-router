@@ -1,8 +1,8 @@
 name: Unassign Inactive Assignees
 
-# Reusable workflow called from maintenance.yml. Advances the per-assignee
-# inactivity state machine on accepted issues using the Timeline API. Does not
-# use pull_request_target (prohibited in this repository).
+# Called from maintenance.yml, or dispatched directly to dry-run a sweep.
+# Advances the per-assignee inactivity state machine on accepted issues using
+# the Timeline API. Does not use pull_request_target (prohibited here).
 
 on:
   workflow_call:
@@ -11,6 +11,36 @@ on:
         description: If true, report the transitions without mutating GitHub state.
         type: boolean
         default: false
+        required: false
+      warn_after_days:
+        description: Days of inactivity before posting a warning comment.
+        type: number
+        default: 15
+        required: false
+      unassign_after_days:
+        description: >-
+          Days of inactivity before removing the assignee. Must exceed
+          warn_after_days; the difference is the grace window a warned
+          contributor gets.
+        type: number
+        default: 30
+        required: false
+      exempt_labels:
+        description: >-
+          Comma-separated labels that pause the inactivity clock for an issue.
+        type: string
+        default: hold
+        required: false
+
+  # Repeated rather than shared: Actions gives each trigger its own input block
+  # and does not resolve YAML anchors. This is the surface a maintainer uses to
+  # dry-run a sweep or override a threshold; the caller runs the standard policy.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: If true, report the transitions without mutating GitHub state.
+        type: boolean
+        default: true
         required: false
       warn_after_days:
         description: Days of inactivity before posting a warning comment.
